@@ -22,8 +22,6 @@
             --region-latam: #bf5af2;
             --region-namerica: #ffd60a;
             --unmute-indicator: #00d9ff;
-            --error-bg: #3a1f1f;
-            --error-border: #ff4444;
         }
 
         * {
@@ -102,6 +100,156 @@
             background: var(--unmute-indicator);
         }
 
+        .settings-btn {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            transition: all 0.2s ease;
+        }
+
+        .settings-btn:hover {
+            border-color: var(--border-active);
+            color: var(--border-active);
+        }
+
+        /* Settings Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            max-width: 1200px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 2rem;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .close-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            transition: color 0.2s ease;
+        }
+
+        .close-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .sources-grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .source-editor {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 1rem;
+        }
+
+        .source-editor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .source-name {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .url-inputs {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .url-input-group {
+            display: grid;
+            gap: 0.25rem;
+        }
+
+        .url-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .url-input {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 0.5rem;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            width: 100%;
+        }
+
+        .url-input:focus {
+            outline: none;
+            border-color: var(--border-active);
+        }
+
+        .save-settings-btn {
+            background: var(--border-active);
+            color: #000;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 2rem;
+            width: 100%;
+            transition: all 0.2s ease;
+        }
+
+        .save-settings-btn:hover {
+            background: #00b8e6;
+        }
+
         /* Main Grid */
         .container {
             max-width: 2400px;
@@ -153,11 +301,6 @@
         .panel.active {
             border-color: var(--border-active);
             box-shadow: 0 0 0 1px var(--border-active), 0 8px 24px rgba(0, 217, 255, 0.15);
-        }
-
-        .panel.error {
-            background: var(--error-bg);
-            border-color: var(--error-border);
         }
 
         .panel-header {
@@ -223,24 +366,6 @@
             align-items: center;
         }
 
-        .control-btn {
-            background: transparent;
-            border: none;
-            color: var(--text-secondary);
-            cursor: pointer;
-            padding: 0.25rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-            font-size: 1rem;
-        }
-
-        .control-btn:hover {
-            color: var(--text-primary);
-            transform: scale(1.1);
-        }
-
         .unmute-indicator {
             width: 8px;
             height: 8px;
@@ -276,70 +401,46 @@
             border: none;
         }
 
-        /* Error State */
-        .error-message {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 1rem;
-            padding: 1.5rem;
-            text-align: center;
-            background: var(--error-bg);
-        }
-
-        .error-icon {
-            font-size: 2rem;
-            opacity: 0.5;
-        }
-
-        .error-text {
-            font-size: 0.813rem;
-            color: var(--text-secondary);
-            margin-bottom: 0.5rem;
-        }
-
+        /* Fallback Links */
         .fallback-links {
+            position: absolute;
+            bottom: 0.5rem;
+            left: 0.5rem;
+            right: 0.5rem;
             display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-            width: 100%;
+            gap: 0.25rem;
+            z-index: 9;
         }
 
         .fallback-link {
-            display: inline-flex;
+            flex: 1;
+            display: flex;
             align-items: center;
             justify-content: center;
-            gap: 0.5rem;
-            padding: 0.5rem 1rem;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            color: var(--text-primary);
+            gap: 0.25rem;
+            padding: 0.35rem 0.5rem;
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            color: #fff;
             text-decoration: none;
-            font-size: 0.75rem;
+            font-size: 0.65rem;
             transition: all 0.2s ease;
         }
 
         .fallback-link:hover {
-            background: var(--bg-panel);
-            border-color: var(--border-active);
-            color: var(--border-active);
+            background: rgba(0, 0, 0, 0.9);
+            border-color: rgba(255, 255, 255, 0.4);
         }
 
         .link-icon {
-            font-size: 0.875rem;
+            font-size: 0.75rem;
         }
 
         /* Fullscreen button */
         .fullscreen-btn {
             position: absolute;
-            bottom: 0.5rem;
+            top: 0.5rem;
             right: 0.5rem;
             background: rgba(0, 0, 0, 0.7);
             border: 1px solid rgba(255, 255, 255, 0.2);
@@ -414,14 +515,27 @@
             <div class="status">
                 <div class="status-item">
                     <span class="status-dot"></span>
-                    <span id="sourceCount">25 SOURCES</span>
+                    <span>25 SOURCES</span>
                 </div>
                 <div class="status-item">
                     <span id="activeChannel">—</span>
                 </div>
+                <button class="settings-btn" onclick="openSettings()">⚙ EDIT SOURCES</button>
             </div>
         </div>
     </header>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Edit News Sources</h2>
+                <button class="close-btn" onclick="closeSettings()">&times;</button>
+            </div>
+            <div id="sourcesEditor" class="sources-grid"></div>
+            <button class="save-settings-btn" onclick="saveSettings()">SAVE & RELOAD</button>
+        </div>
+    </div>
 
     <main class="container">
         <div class="grid" id="newsGrid"></div>
@@ -462,250 +576,126 @@
     </footer>
 
     <script>
-        const newsSources = [
+        // Default news sources with direct embed URLs
+        const defaultSources = [
             // EUROPE
-            { 
-                name: 'BFM TV', 
-                country: 'France', 
-                language: 'French', 
-                region: 'europe', 
-                channelId: 'UCqgynP-0NsNT3e56DQDL5ww',
-                youtubeUrl: 'https://www.youtube.com/@BFMTV/live',
-                websiteUrl: 'https://www.bfmtv.com/en-direct/'
-            },
-            { 
-                name: 'DW Deutsch', 
-                country: 'Germany', 
-                language: 'German', 
-                region: 'europe', 
-                channelId: 'UCQ0QHCIbAzIw1WvShjAJPeQ',
-                youtubeUrl: 'https://www.youtube.com/@DeutscheWelle/live',
-                websiteUrl: 'https://www.dw.com/de/media-center/live-tv/s-100825'
-            },
-            { 
-                name: 'Sky TG24', 
-                country: 'Italy', 
-                language: 'Italian', 
-                region: 'europe', 
-                channelId: 'UCd6qGwhB_tOYRQUIU__I2hQ',
-                youtubeUrl: 'https://www.youtube.com/@SkyTG24/live',
-                websiteUrl: 'https://tg24.sky.it/diretta'
-            },
-            { 
-                name: 'RTVE 24h', 
-                country: 'Spain', 
-                language: 'Spanish', 
-                region: 'europe', 
-                channelId: 'UC7QZIf0dta-XPXsp9Hv4dTw',
-                youtubeUrl: 'https://www.youtube.com/@RTVE/live',
-                websiteUrl: 'https://www.rtve.es/play/videos/directo/canales-lineales/24h/'
-            },
-            { 
-                name: 'ERT News', 
-                country: 'Greece', 
-                language: 'Greek', 
-                region: 'europe', 
-                channelId: 'UC3AqjREiiWC5xdWRXGVs0fQ',
-                youtubeUrl: 'https://www.youtube.com/@ertflix/live',
-                websiteUrl: 'https://www.ertflix.gr/live/'
-            },
-            { 
-                name: 'NOS Journaal', 
-                country: 'Netherlands', 
-                language: 'Dutch', 
-                region: 'europe', 
-                channelId: 'UCqSFqKUjgPUlDd50jV_QrMQ',
-                youtubeUrl: 'https://www.youtube.com/@nos/live',
-                websiteUrl: 'https://nos.nl/livestream/2486528-nos-journaal-24-live'
-            },
-            { 
-                name: 'SVT Nyheter', 
-                country: 'Sweden', 
-                language: 'Swedish', 
-                region: 'europe', 
-                channelId: 'UC8v1pCzdeyII7FEzoNPcadg',
-                youtubeUrl: 'https://www.youtube.com/@svtnyheter/live',
-                websiteUrl: 'https://www.svtplay.se/kanaler/svt24'
-            },
-            { 
-                name: 'TVP Info', 
-                country: 'Poland', 
-                language: 'Polish', 
-                region: 'europe', 
-                channelId: 'UCM-3kEG1Da0FeQrbOJx-ehA',
-                youtubeUrl: 'https://www.youtube.com/@tvpinfo/live',
-                websiteUrl: 'https://www.tvp.pl/tvp-info'
-            },
+            { name: 'BFM TV', country: 'France', language: 'French', region: 'europe', 
+              embedUrl: 'https://www.youtube.com/embed/VHLchC_4F0Q',
+              youtubeUrl: 'https://www.youtube.com/@BFMTV/live',
+              websiteUrl: 'https://www.bfmtv.com/en-direct/' },
+            { name: 'DW Deutsch', country: 'Germany', language: 'German', region: 'europe', 
+              embedUrl: 'https://www.youtube.com/embed/J-SbS5bCUfI',
+              youtubeUrl: 'https://www.youtube.com/@DeutscheWelle/live',
+              websiteUrl: 'https://www.dw.com/de/media-center/live-tv/s-100825' },
+            { name: 'Sky TG24', country: 'Italy', language: 'Italian', region: 'europe', 
+              embedUrl: 'https://www.youtube.com/embed/XtWS0OQ7BxE',
+              youtubeUrl: 'https://www.youtube.com/@SkyTG24/live',
+              websiteUrl: 'https://tg24.sky.it/diretta' },
+            { name: 'RTVE 24h', country: 'Spain', language: 'Spanish', region: 'europe', 
+              embedUrl: 'https://www.youtube.com/embed/ot1-sIDHu8w',
+              youtubeUrl: 'https://www.youtube.com/@RTVE/live',
+              websiteUrl: 'https://www.rtve.es/play/videos/directo/canales-lineales/24h/' },
+            { name: 'ERT News', country: 'Greece', language: 'Greek', region: 'europe', 
+              embedUrl: 'https://www.youtube.com/embed/hYW0RAtl0ao',
+              youtubeUrl: 'https://www.youtube.com/@ertflix/live',
+              websiteUrl: 'https://www.ertflix.gr/live/' },
+            { name: 'NOS Journaal', country: 'Netherlands', language: 'Dutch', region: 'europe', 
+              embedUrl: 'https://www.youtube.com/embed/xdDkHWVaaZ0',
+              youtubeUrl: 'https://www.youtube.com/@nos/live',
+              websiteUrl: 'https://nos.nl/livestream/2486528-nos-journaal-24-live' },
+            { name: 'SVT Nyheter', country: 'Sweden', language: 'Swedish', region: 'europe', 
+              embedUrl: 'https://www.youtube.com/embed/yRLMFyJLA74',
+              youtubeUrl: 'https://www.youtube.com/@svtnyheter/live',
+              websiteUrl: 'https://www.svtplay.se/kanaler/svt24' },
+            { name: 'TVP Info', country: 'Poland', language: 'Polish', region: 'europe', 
+              embedUrl: 'https://www.youtube.com/embed/w4SR6T_cSTY',
+              youtubeUrl: 'https://www.youtube.com/@tvpinfo/live',
+              websiteUrl: 'https://www.tvp.pl/tvp-info' },
             
             // MIDDLE EAST & NORTH AFRICA
-            { 
-                name: 'Al Jazeera Mubasher', 
-                country: 'Qatar', 
-                language: 'Arabic', 
-                region: 'mena', 
-                channelId: 'UCfIbaUAIkT1u_JkWJdv7pKQ',
-                youtubeUrl: 'https://www.youtube.com/@AlJazeeraMubasher/live',
-                websiteUrl: 'https://mubasher.aljazeera.net/live'
-            },
-            { 
-                name: 'Al Arabiya', 
-                country: 'UAE/Saudi', 
-                language: 'Arabic', 
-                region: 'mena', 
-                channelId: 'UCB9mN2Awwajnt8p2rFhAG7A',
-                youtubeUrl: 'https://www.youtube.com/@AlArabiya/live',
-                websiteUrl: 'https://www.alarabiya.net/live'
-            },
-            { 
-                name: 'TRT Haber', 
-                country: 'Turkey', 
-                language: 'Turkish', 
-                region: 'mena', 
-                channelId: 'UCQhFN0kIsV0S3Qez6gEa8pQ',
-                youtubeUrl: 'https://www.youtube.com/@TRTHaber/live',
-                websiteUrl: 'https://www.trthaber.com/canli-yayin/'
-            },
-            { 
-                name: 'i24NEWS Hebrew', 
-                country: 'Israel', 
-                language: 'Hebrew', 
-                region: 'mena', 
-                channelId: 'UCSyxJH2iwmRNf2N6ynW3o-A',
-                youtubeUrl: 'https://www.youtube.com/@i24newshebrew/live',
-                websiteUrl: 'https://www.i24news.tv/he/live'
-            },
+            { name: 'Al Jazeera Mubasher', country: 'Qatar', language: 'Arabic', region: 'mena', 
+              embedUrl: 'https://www.youtube.com/embed/qBJUoZ6YbF4',
+              youtubeUrl: 'https://www.youtube.com/@AlJazeeraMubasher/live',
+              websiteUrl: 'https://mubasher.aljazeera.net/live' },
+            { name: 'Al Arabiya', country: 'UAE/Saudi', language: 'Arabic', region: 'mena', 
+              embedUrl: 'https://www.youtube.com/embed/Dd6Wjalnte0',
+              youtubeUrl: 'https://www.youtube.com/@AlArabiya/live',
+              websiteUrl: 'https://www.alarabiya.net/live' },
+            { name: 'TRT Haber', country: 'Turkey', language: 'Turkish', region: 'mena', 
+              embedUrl: 'https://www.youtube.com/embed/WLGKy6dhtio',
+              youtubeUrl: 'https://www.youtube.com/@TRTHaber/live',
+              websiteUrl: 'https://www.trthaber.com/canli-yayin/' },
+            { name: 'i24NEWS Hebrew', country: 'Israel', language: 'Hebrew', region: 'mena', 
+              embedUrl: 'https://www.youtube.com/embed/mdSirocu_GQ',
+              youtubeUrl: 'https://www.youtube.com/@i24newshebrew/live',
+              websiteUrl: 'https://www.i24news.tv/he/live' },
             
             // ASIA-PACIFIC
-            { 
-                name: 'NHK News', 
-                country: 'Japan', 
-                language: 'Japanese', 
-                region: 'asia', 
-                channelId: 'UCCzGR6XvfJGz24sliQhTjag',
-                youtubeUrl: 'https://www.youtube.com/@nhk_news/live',
-                websiteUrl: 'https://www3.nhk.or.jp/news/live/'
-            },
-            { 
-                name: 'YTN', 
-                country: 'South Korea', 
-                language: 'Korean', 
-                region: 'asia', 
-                channelId: 'UChlgI3UHCOnwUGzWzbJ3H5w',
-                youtubeUrl: 'https://www.youtube.com/@ytn_news/live',
-                websiteUrl: 'https://www.ytn.co.kr/live'
-            },
-            { 
-                name: 'NDTV India', 
-                country: 'India', 
-                language: 'Hindi/English', 
-                region: 'asia', 
-                channelId: 'UCZFMm1mMw0F81Z37aaEzTUA',
-                youtubeUrl: 'https://www.youtube.com/@ndtv/live',
-                websiteUrl: 'https://www.ndtv.com/livetv'
-            },
-            { 
-                name: 'TVBS NEWS', 
-                country: 'Taiwan', 
-                language: 'Mandarin', 
-                region: 'asia', 
-                channelId: 'UC5nwNW4KdC0SzrhF9BXEYOQ',
-                youtubeUrl: 'https://www.youtube.com/@tvbsnews/live',
-                websiteUrl: 'https://news.tvbs.com.tw/live/1'
-            },
-            { 
-                name: 'CNA', 
-                country: 'Singapore', 
-                language: 'English', 
-                region: 'asia', 
-                channelId: 'UC83jt4dlz1Gjl58fzQrrKZg',
-                youtubeUrl: 'https://www.youtube.com/@channelnewsasia/live',
-                websiteUrl: 'https://www.channelnewsasia.com/watch'
-            },
-            { 
-                name: 'CGTN Chinese', 
-                country: 'China', 
-                language: 'Mandarin', 
-                region: 'asia', 
-                channelId: 'UCgrNz-aDmcr2uuto8_DL2jg',
-                youtubeUrl: 'https://www.youtube.com/@CGTNOfficial/live',
-                websiteUrl: 'https://www.cgtn.com/live'
-            },
+            { name: 'NHK News', country: 'Japan', language: 'Japanese', region: 'asia', 
+              embedUrl: 'https://www.youtube.com/embed/f0lYkdA-Gtw',
+              youtubeUrl: 'https://www.youtube.com/@nhk_news/live',
+              websiteUrl: 'https://www3.nhk.or.jp/news/live/' },
+            { name: 'YTN', country: 'South Korea', language: 'Korean', region: 'asia', 
+              embedUrl: 'https://www.youtube.com/embed/V6f7GgWdTz8',
+              youtubeUrl: 'https://www.youtube.com/@ytn_news/live',
+              websiteUrl: 'https://www.ytn.co.kr/live' },
+            { name: 'NDTV India', country: 'India', language: 'Hindi/English', region: 'asia', 
+              embedUrl: 'https://www.youtube.com/embed/WP-vCJmJ5R0',
+              youtubeUrl: 'https://www.youtube.com/@ndtv/live',
+              websiteUrl: 'https://www.ndtv.com/livetv' },
+            { name: 'TVBS NEWS', country: 'Taiwan', language: 'Mandarin', region: 'asia', 
+              embedUrl: 'https://www.youtube.com/embed/2VdvILNWTMM',
+              youtubeUrl: 'https://www.youtube.com/@tvbsnews/live',
+              websiteUrl: 'https://news.tvbs.com.tw/live/1' },
+            { name: 'CNA', country: 'Singapore', language: 'English', region: 'asia', 
+              embedUrl: 'https://www.youtube.com/embed/XWq5kBlakcQ',
+              youtubeUrl: 'https://www.youtube.com/@channelnewsasia/live',
+              websiteUrl: 'https://www.channelnewsasia.com/watch' },
+            { name: 'CGTN Chinese', country: 'China', language: 'Mandarin', region: 'asia', 
+              embedUrl: 'https://www.youtube.com/embed/JmXAmkKKslE',
+              youtubeUrl: 'https://www.youtube.com/@CGTNOfficial/live',
+              websiteUrl: 'https://www.cgtn.com/live' },
             
             // IRAN
-            { 
-                name: 'Press TV', 
-                country: 'Iran', 
-                language: 'Persian/English', 
-                region: 'mena', 
-                channelId: 'UCoza7cKEmGwc-WZpBe-1WnA',
-                youtubeUrl: 'https://www.youtube.com/@presstv/live',
-                websiteUrl: 'https://www.presstv.ir/live.html'
-            },
+            { name: 'Press TV', country: 'Iran', language: 'Persian/English', region: 'mena', 
+              embedUrl: 'https://www.youtube.com/embed/B7_rLTcvLV8',
+              youtubeUrl: 'https://www.youtube.com/@presstv/live',
+              websiteUrl: 'https://www.presstv.ir/live.html' },
             
             // SUB-SAHARAN AFRICA
-            { 
-                name: 'Channels TV', 
-                country: 'Nigeria', 
-                language: 'English', 
-                region: 'africa', 
-                channelId: 'UC639K3bsV-RojdsHS13kSYg',
-                youtubeUrl: 'https://www.youtube.com/@channelstv/live',
-                websiteUrl: 'https://www.channelstv.com/live/'
-            },
-            { 
-                name: 'eNCA', 
-                country: 'South Africa', 
-                language: 'English/Afrikaans', 
-                region: 'africa', 
-                channelId: 'UCfvHHIU4OcJd56YgdiRIqcg',
-                youtubeUrl: 'https://www.youtube.com/@enca/live',
-                websiteUrl: 'https://www.enca.com/live'
-            },
+            { name: 'Channels TV', country: 'Nigeria', language: 'English', region: 'africa', 
+              embedUrl: 'https://www.youtube.com/embed/bq_kE2RT1H8',
+              youtubeUrl: 'https://www.youtube.com/@channelstv/live',
+              websiteUrl: 'https://www.channelstv.com/live/' },
+            { name: 'eNCA', country: 'South Africa', language: 'English/Afrikaans', region: 'africa', 
+              embedUrl: 'https://www.youtube.com/embed/eIqgLna9XYQ',
+              youtubeUrl: 'https://www.youtube.com/@enca/live',
+              websiteUrl: 'https://www.enca.com/live' },
             
             // LATIN AMERICA
-            { 
-                name: 'GloboNews', 
-                country: 'Brazil', 
-                language: 'Portuguese', 
-                region: 'latam', 
-                channelId: 'UCgNG_TXKAJhXGBHMZ5uZuPA',
-                youtubeUrl: 'https://www.youtube.com/@GloboNews/live',
-                websiteUrl: 'https://globoplay.globo.com/globonews/ao-vivo/'
-            },
-            { 
-                name: 'TN Todo Noticias', 
-                country: 'Argentina', 
-                language: 'Spanish', 
-                region: 'latam', 
-                channelId: 'UCj6PcyLvpnIRT_2W_mwa9Aw',
-                youtubeUrl: 'https://www.youtube.com/@todonoticias/live',
-                websiteUrl: 'https://tn.com.ar/vivo/'
-            },
-            { 
-                name: 'Milenio', 
-                country: 'Mexico', 
-                language: 'Spanish', 
-                region: 'latam', 
-                channelId: 'UCFxHplbcoJK9zlrsN_vVLeQ',
-                youtubeUrl: 'https://www.youtube.com/@MilenioNoticias/live',
-                websiteUrl: 'https://www.milenio.com/milenio-noticias-en-vivo'
-            },
+            { name: 'GloboNews', country: 'Brazil', language: 'Portuguese', region: 'latam', 
+              embedUrl: 'https://www.youtube.com/embed/Jc7aDLT0mg0',
+              youtubeUrl: 'https://www.youtube.com/@GloboNews/live',
+              websiteUrl: 'https://globoplay.globo.com/globonews/ao-vivo/' },
+            { name: 'TN Todo Noticias', country: 'Argentina', language: 'Spanish', region: 'latam', 
+              embedUrl: 'https://www.youtube.com/embed/wHn1_QVoXGM',
+              youtubeUrl: 'https://www.youtube.com/@todonoticias/live',
+              websiteUrl: 'https://tn.com.ar/vivo/' },
+            { name: 'Milenio', country: 'Mexico', language: 'Spanish', region: 'latam', 
+              embedUrl: 'https://www.youtube.com/embed/hBkjOHLsMeI',
+              youtubeUrl: 'https://www.youtube.com/@MilenioNoticias/live',
+              websiteUrl: 'https://www.milenio.com/milenio-noticias-en-vivo' },
             
             // NORTH AMERICA
-            { 
-                name: 'CBC News Network', 
-                country: 'Canada', 
-                language: 'English/French', 
-                region: 'namerica', 
-                channelId: 'UCG5r8tvNe4WPJDD3zfm5qDQ',
-                youtubeUrl: 'https://www.youtube.com/@cbcnews/live',
-                websiteUrl: 'https://www.cbc.ca/player/play/video/9.6253955'
-            }
+            { name: 'CBC News Network', country: 'Canada', language: 'English/French', region: 'namerica', 
+              embedUrl: 'https://www.youtube.com/embed/_y2mJFV73U0',
+              youtubeUrl: 'https://www.youtube.com/@cbcnews/live',
+              websiteUrl: 'https://www.cbc.ca/player/play/video/9.6253955' }
         ];
 
+        // Load sources from localStorage or use defaults
+        let newsSources = JSON.parse(localStorage.getItem('newsSources')) || defaultSources;
         let activePanel = null;
-        let workingCount = 0;
-        let errorCount = 0;
 
         function createPanel(source, index) {
             const panel = document.createElement('div');
@@ -725,103 +715,33 @@
                         <div class="unmute-indicator"></div>
                     </div>
                 </div>
-                <div class="video-container" id="container-${index}">
+                <div class="video-container">
                     <iframe 
                         id="player-${index}"
-                        src="https://www.youtube.com/embed/live_stream?channel=${source.channelId}&autoplay=1&mute=1&enablejsapi=1&controls=1&modestbranding=1&rel=0"
+                        src="${source.embedUrl}?autoplay=1&mute=1&enablejsapi=1&controls=1&modestbranding=1&rel=0"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowfullscreen>
                     </iframe>
                     <button class="fullscreen-btn" onclick="openFullscreen(${index})">
-                        ⛶ Fullscreen
+                        ⛶ 
                     </button>
+                    <div class="fallback-links">
+                        <a href="${source.youtubeUrl}" target="_blank" class="fallback-link">
+                            <span class="link-icon">▶</span> YT
+                        </a>
+                        <a href="${source.websiteUrl}" target="_blank" class="fallback-link">
+                            <span class="link-icon">🌐</span> Web
+                        </a>
+                    </div>
                 </div>
             `;
 
             // Click handler for toggling audio
             panel.querySelector('.panel-header').addEventListener('click', () => {
-                if (!panel.classList.contains('error')) {
-                    toggleAudio(index, source.name);
-                }
+                toggleAudio(index, source.name);
             });
 
-            // Error detection - check after a delay
-            setTimeout(() => {
-                checkVideoStatus(index, source);
-            }, 3000);
-
             return panel;
-        }
-
-        function checkVideoStatus(index, source) {
-            const iframe = document.getElementById(`player-${index}`);
-            const container = document.getElementById(`container-${index}`);
-            const panel = document.querySelector(`[data-index="${index}"]`);
-            
-            // Try to detect if video failed to load
-            // Since we can't directly check iframe content due to cross-origin, 
-            // we'll provide fallback links preemptively for better UX
-            
-            // For now, add a fallback option to all panels
-            addFallbackLinks(container, source, index);
-        }
-
-        function addFallbackLinks(container, source, index) {
-            // Add a small fallback section at the bottom
-            const fallbackDiv = document.createElement('div');
-            fallbackDiv.style.cssText = `
-                position: absolute;
-                bottom: 2.5rem;
-                left: 0.5rem;
-                right: 0.5rem;
-                display: flex;
-                gap: 0.25rem;
-                z-index: 9;
-            `;
-            
-            fallbackDiv.innerHTML = `
-                <a href="${source.youtubeUrl}" target="_blank" class="fallback-link" style="flex: 1; font-size: 0.65rem; padding: 0.35rem 0.5rem;">
-                    <span class="link-icon">▶</span> YouTube
-                </a>
-                <a href="${source.websiteUrl}" target="_blank" class="fallback-link" style="flex: 1; font-size: 0.65rem; padding: 0.35rem 0.5rem;">
-                    <span class="link-icon">🌐</span> Website
-                </a>
-            `;
-            
-            container.appendChild(fallbackDiv);
-        }
-
-        function showError(index, source) {
-            const container = document.getElementById(`container-${index}`);
-            const panel = document.querySelector(`[data-index="${index}"]`);
-            
-            panel.classList.add('error');
-            errorCount++;
-            updateSourceCount();
-            
-            container.innerHTML = `
-                <div class="error-message">
-                    <div class="error-icon">⚠</div>
-                    <div class="error-text">Embed unavailable</div>
-                    <div class="fallback-links">
-                        <a href="${source.youtubeUrl}" target="_blank" class="fallback-link">
-                            <span class="link-icon">▶</span>
-                            <span>Open on YouTube</span>
-                        </a>
-                        <a href="${source.websiteUrl}" target="_blank" class="fallback-link">
-                            <span class="link-icon">🌐</span>
-                            <span>Open on ${source.name} Website</span>
-                        </a>
-                    </div>
-                </div>
-            `;
-        }
-
-        function updateSourceCount() {
-            const total = newsSources.length;
-            const working = total - errorCount;
-            document.getElementById('sourceCount').textContent = 
-                `${working}/${total} SOURCES EMBEDDED`;
         }
 
         function toggleAudio(index, channelName) {
@@ -829,40 +749,85 @@
             const clickedPanel = panels[index];
             const iframe = document.getElementById(`player-${index}`);
 
-            // If clicking the already active panel, do nothing (keep it active)
             if (activePanel === index) {
                 return;
             }
 
-            // Mute the previously active panel
             if (activePanel !== null) {
                 panels[activePanel].classList.remove('active');
                 const prevIframe = document.getElementById(`player-${activePanel}`);
-                if (prevIframe) {
-                    prevIframe.contentWindow.postMessage('{"event":"command","func":"mute","args":""}', '*');
-                }
+                prevIframe.contentWindow.postMessage('{"event":"command","func":"mute","args":""}', '*');
             }
 
-            // Activate the new panel
             activePanel = index;
             clickedPanel.classList.add('active');
-            if (iframe) {
-                iframe.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}', '*');
-            }
+            iframe.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}', '*');
 
-            // Update status display
             document.getElementById('activeChannel').textContent = `ACTIVE: ${channelName}`;
         }
 
         function openFullscreen(index) {
-            const container = document.getElementById(`container-${index}`);
-            if (container.requestFullscreen) {
-                container.requestFullscreen();
-            } else if (container.webkitRequestFullscreen) {
-                container.webkitRequestFullscreen();
-            } else if (container.msRequestFullscreen) {
-                container.msRequestFullscreen();
+            const iframe = document.getElementById(`player-${index}`);
+            if (iframe.requestFullscreen) {
+                iframe.requestFullscreen();
+            } else if (iframe.webkitRequestFullscreen) {
+                iframe.webkitRequestFullscreen();
+            } else if (iframe.msRequestFullscreen) {
+                iframe.msRequestFullscreen();
             }
+        }
+
+        function openSettings() {
+            const modal = document.getElementById('settingsModal');
+            const editor = document.getElementById('sourcesEditor');
+            
+            editor.innerHTML = '';
+            
+            newsSources.forEach((source, index) => {
+                const editorDiv = document.createElement('div');
+                editorDiv.className = 'source-editor';
+                editorDiv.innerHTML = `
+                    <div class="source-editor-header">
+                        <div class="source-name">${source.name}</div>
+                        <div class="region-tag region-${source.region}">${source.region}</div>
+                    </div>
+                    <div class="url-inputs">
+                        <div class="url-input-group">
+                            <label class="url-label">Embed URL (YouTube embed or direct stream)</label>
+                            <input type="text" class="url-input" data-index="${index}" data-field="embedUrl" value="${source.embedUrl}">
+                        </div>
+                        <div class="url-input-group">
+                            <label class="url-label">YouTube Fallback URL</label>
+                            <input type="text" class="url-input" data-index="${index}" data-field="youtubeUrl" value="${source.youtubeUrl}">
+                        </div>
+                        <div class="url-input-group">
+                            <label class="url-label">Website Fallback URL</label>
+                            <input type="text" class="url-input" data-index="${index}" data-field="websiteUrl" value="${source.websiteUrl}">
+                        </div>
+                    </div>
+                `;
+                editor.appendChild(editorDiv);
+            });
+            
+            modal.classList.add('active');
+        }
+
+        function closeSettings() {
+            document.getElementById('settingsModal').classList.remove('active');
+        }
+
+        function saveSettings() {
+            const inputs = document.querySelectorAll('.url-input');
+            
+            inputs.forEach(input => {
+                const index = parseInt(input.dataset.index);
+                const field = input.dataset.field;
+                newsSources[index][field] = input.value;
+            });
+            
+            localStorage.setItem('newsSources', JSON.stringify(newsSources));
+            closeSettings();
+            location.reload();
         }
 
         // Initialize grid
@@ -871,18 +836,10 @@
             grid.appendChild(createPanel(source, index));
         });
 
-        // Auto-activate first non-error panel on load
+        // Auto-activate first panel
         setTimeout(() => {
-            let firstWorking = 0;
-            const panels = document.querySelectorAll('.panel');
-            for (let i = 0; i < panels.length; i++) {
-                if (!panels[i].classList.contains('error')) {
-                    firstWorking = i;
-                    break;
-                }
-            }
-            toggleAudio(firstWorking, newsSources[firstWorking].name);
-        }, 3500);
+            toggleAudio(0, newsSources[0].name);
+        }, 1000);
     </script>
 </body>
 </html>
