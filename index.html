@@ -705,10 +705,9 @@
             const panel = document.createElement('div');
             panel.className = 'panel';
             panel.dataset.index = index;
-            panel.draggable = true;
 
-            // Detect embed type and generate appropriate embed code
-            const embedCode = generateEmbedCode(source.videoUrl, index);
+            // Convert YouTube URL to embed URL
+            const embedUrl = source.videoUrl.replace('watch?v=', 'embed/');
 
             panel.innerHTML = `
                 <div class="panel-header">
@@ -724,7 +723,15 @@
                     </div>
                 </div>
                 <div class="video-container">
-                    ${embedCode}
+                    <iframe 
+                        id="player-${index}"
+                        src="${embedUrl}?autoplay=1&mute=1&enablejsapi=1"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowfullscreen>
+                    </iframe>
+                    <button class="fullscreen-btn" onclick="openFullscreen(${index})">
+                        ⛶ 
+                    </button>
                     <div class="fallback-links">
                         <a href="${source.youtubeUrl}" target="_blank" class="fallback-link">
                             <span class="link-icon">▶</span> YT
@@ -733,17 +740,6 @@
                             <span class="link-icon">🌐</span> Web
                         </a>
                     </div>
-                    <div class="panel-controls">
-                        <button class="panel-control-btn" onclick="openFullscreen(${index})" title="Fullscreen">
-                            ⛶
-                        </button>
-                        <button class="panel-control-btn" onclick="hidePanel(${index})" title="Hide panel">
-                            👁
-                        </button>
-                        <button class="panel-control-btn danger" onclick="removePanel(${index})" title="Remove panel">
-                            ✕
-                        </button>
-                    </div>
                 </div>
             `;
 
@@ -751,13 +747,6 @@
             panel.querySelector('.panel-header').addEventListener('click', () => {
                 toggleAudio(index, source.name);
             });
-
-            // Drag and drop handlers
-            panel.addEventListener('dragstart', handleDragStart);
-            panel.addEventListener('dragend', handleDragEnd);
-            panel.addEventListener('dragover', handleDragOver);
-            panel.addEventListener('drop', handleDrop);
-            panel.addEventListener('dragleave', handleDragLeave);
 
             return panel;
         }
@@ -807,10 +796,7 @@
                 editorDiv.innerHTML = `
                     <div class="source-editor-header">
                         <div class="source-name">${source.name}</div>
-                        <div style="display: flex; gap: 0.5rem; align-items: center;">
-                            <div class="region-tag region-${source.region}">${source.region}</div>
-                            <button onclick="deleteSource(${index})" style="background: #ff4444; color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 3px; cursor: pointer; font-size: 0.75rem;">✕ Delete</button>
-                        </div>
+                        <div class="region-tag region-${source.region}">${source.region}</div>
                     </div>
                     <div class="url-inputs">
                         <div class="url-input-group">
@@ -829,29 +815,8 @@
                 `;
                 editor.appendChild(editorDiv);
             });
-
-            // Add "Add New Source" button at the bottom of settings
-            const addButtonDiv = document.createElement('div');
-            addButtonDiv.style.cssText = 'text-align: center; padding: 1rem; border-top: 1px solid var(--border-color); margin-top: 1rem;';
-            addButtonDiv.innerHTML = `
-                <button onclick="openAddSourceFromSettings()" style="background: var(--border-active); color: #000; border: none; padding: 0.75rem 2rem; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-weight: 600; cursor: pointer; font-size: 0.875rem;">+ ADD NEW SOURCE</button>
-            `;
-            editor.appendChild(addButtonDiv);
             
             modal.classList.add('active');
-        }
-
-        function deleteSource(index) {
-            if (confirm(`Delete ${newsSources[index].name}? This will permanently remove it.`)) {
-                newsSources.splice(index, 1);
-                localStorage.setItem('newsSources', JSON.stringify(newsSources));
-                location.reload();
-            }
-        }
-
-        function openAddSourceFromSettings() {
-            closeSettings();
-            setTimeout(() => addNewSource(), 100);
         }
 
         function closeSettings() {
@@ -864,9 +829,7 @@
             inputs.forEach(input => {
                 const index = parseInt(input.dataset.index);
                 const field = input.dataset.field;
-                if (!isNaN(index) && field) {
-                    newsSources[index][field] = input.value;
-                }
+                newsSources[index][field] = input.value;
             });
             
             localStorage.setItem('newsSources', JSON.stringify(newsSources));
@@ -874,228 +837,15 @@
             location.reload();
         }
 
-        function addNewSource() {
-            document.getElementById('addSourceModal').classList.add('active');
-        }
-
-        function closeAddSource() {
-            document.getElementById('addSourceModal').classList.remove('active');
-        }
-
-        function clearAddSourceForm() {
-            document.getElementById('newSourceName').value = '';
-            document.getElementById('newSourceCountry').value = '';
-            document.getElementById('newSourceLanguage').value = '';
-            document.getElementById('newSourceRegion').value = 'europe';
-            document.getElementById('newSourceVideoUrl').value = '';
-            document.getElementById('newSourceYoutubeUrl').value = '';
-            document.getElementById('newSourceWebsiteUrl').value = '';
-        }
-
-        function saveNewSource() {
-            const name = document.getElementById('newSourceName').value.trim();
-            const country = document.getElementById('newSourceCountry').value.trim();
-            const language = document.getElementById('newSourceLanguage').value.trim();
-            const region = document.getElementById('newSourceRegion').value;
-            const videoUrl = document.getElementById('newSourceVideoUrl').value.trim();
-            const youtubeUrl = document.getElementById('newSourceYoutubeUrl').value.trim() || videoUrl;
-            const websiteUrl = document.getElementById('newSourceWebsiteUrl').value.trim() || videoUrl;
-
-            if (!name || !country || !language || !videoUrl) {
-                alert('Please fill in all required fields (*)');
-                return;
-            }
-
-            const newSource = {
-                name,
-                country,
-                language,
-                region,
-                videoUrl,
-                youtubeUrl,
-                websiteUrl
-            };
-
-            newsSources.push(newSource);
-            localStorage.setItem('newsSources', JSON.stringify(newsSources));
-            clearAddSourceForm();
-            closeAddSource();
-            location.reload();
-        }
-
-        function openGlobeView() {
-            // Save current sources to localStorage so globe view can access them
-            localStorage.setItem('newsSources', JSON.stringify(newsSources));
-            
-            // Get the current page URL and replace the filename
-            const currentUrl = window.location.href;
-            const globeUrl = currentUrl.replace('global-news-monitor-final.html', 'global-news-globe.html');
-            
-            window.open(globeUrl, '_blank');
-        }
-
-        function hidePanel(index) {
-            const panel = document.querySelector(`[data-index="${index}"]`);
-            panel.classList.add('hidden');
-            
-            // Save hidden state
-            const hiddenPanels = JSON.parse(localStorage.getItem('hiddenPanels') || '[]');
-            if (!hiddenPanels.includes(index)) {
-                hiddenPanels.push(index);
-                localStorage.setItem('hiddenPanels', JSON.stringify(hiddenPanels));
-            }
-
-            // If this was the active panel, deactivate it
-            if (activePanel === index) {
-                activePanel = null;
-                document.getElementById('activeChannel').textContent = '—';
-            }
-        }
-
-        function removePanel(index) {
-            if (confirm(`Remove ${newsSources[index].name} from the dashboard?`)) {
-                const panel = document.querySelector(`[data-index="${index}"]`);
-                panel.remove();
-                
-                // Save removed state
-                const removedPanels = JSON.parse(localStorage.getItem('removedPanels') || '[]');
-                if (!removedPanels.includes(index)) {
-                    removedPanels.push(index);
-                    localStorage.setItem('removedPanels', JSON.stringify(removedPanels));
-                }
-
-                // If this was the active panel, deactivate it
-                if (activePanel === index) {
-                    activePanel = null;
-                    document.getElementById('activeChannel').textContent = '—';
-                }
-            }
-        }
-
-        function showAllPanels() {
-            document.querySelectorAll('.panel.hidden').forEach(panel => {
-                panel.classList.remove('hidden');
-            });
-            localStorage.removeItem('hiddenPanels');
-        }
-
-        function resetPanels() {
-            if (confirm('Reset all panels? This will restore all removed panels and reset the order.')) {
-                localStorage.removeItem('hiddenPanels');
-                localStorage.removeItem('removedPanels');
-                localStorage.removeItem('panelOrder');
-                location.reload();
-            }
-        }
-
-        // Drag and drop functionality
-        let draggedElement = null;
-
-        function handleDragStart(e) {
-            draggedElement = this;
-            this.classList.add('dragging');
-            e.dataTransfer.effectAllowed = 'move';
-            e.dataTransfer.setData('text/html', this.innerHTML);
-        }
-
-        function handleDragEnd(e) {
-            this.classList.remove('dragging');
-            
-            // Remove drag-over class from all panels
-            document.querySelectorAll('.panel').forEach(panel => {
-                panel.classList.remove('drag-over');
-            });
-        }
-
-        function handleDragOver(e) {
-            if (e.preventDefault) {
-                e.preventDefault();
-            }
-            e.dataTransfer.dropEffect = 'move';
-            return false;
-        }
-
-        function handleDrop(e) {
-            if (e.stopPropagation) {
-                e.stopPropagation();
-            }
-
-            if (draggedElement !== this) {
-                // Swap the positions
-                const grid = document.getElementById('newsGrid');
-                const allPanels = [...grid.children];
-                const draggedIndex = allPanels.indexOf(draggedElement);
-                const droppedIndex = allPanels.indexOf(this);
-
-                if (draggedIndex < droppedIndex) {
-                    this.parentNode.insertBefore(draggedElement, this.nextSibling);
-                } else {
-                    this.parentNode.insertBefore(draggedElement, this);
-                }
-
-                // Save new order
-                savePanelOrder();
-            }
-
-            this.classList.remove('drag-over');
-            return false;
-        }
-
-        function handleDragLeave(e) {
-            this.classList.remove('drag-over');
-        }
-
-        function savePanelOrder() {
-            const grid = document.getElementById('newsGrid');
-            const order = [...grid.children].map(panel => parseInt(panel.dataset.index));
-            localStorage.setItem('panelOrder', JSON.stringify(order));
-        }
-
-        function restorePanelOrder() {
-            const savedOrder = localStorage.getItem('panelOrder');
-            if (!savedOrder) return;
-
-            const order = JSON.parse(savedOrder);
-            const grid = document.getElementById('newsGrid');
-            const panels = [...grid.children];
-
-            order.forEach(index => {
-                const panel = panels.find(p => parseInt(p.dataset.index) === index);
-                if (panel) {
-                    grid.appendChild(panel);
-                }
-            });
-        }
-
         // Initialize grid
         const grid = document.getElementById('newsGrid');
-        const removedPanels = JSON.parse(localStorage.getItem('removedPanels') || '[]');
-        const hiddenPanels = JSON.parse(localStorage.getItem('hiddenPanels') || '[]');
-        
         newsSources.forEach((source, index) => {
-            // Skip removed panels
-            if (removedPanels.includes(index)) return;
-            
-            const panel = createPanel(source, index);
-            
-            // Apply hidden state
-            if (hiddenPanels.includes(index)) {
-                panel.classList.add('hidden');
-            }
-            
-            grid.appendChild(panel);
+            grid.appendChild(createPanel(source, index));
         });
 
-        // Restore panel order
-        restorePanelOrder();
-
-        // Auto-activate first visible panel
+        // Auto-activate first panel
         setTimeout(() => {
-            const firstVisible = document.querySelector('.panel:not(.hidden)');
-            if (firstVisible) {
-                const index = parseInt(firstVisible.dataset.index);
-                toggleAudio(index, newsSources[index].name);
-            }
+            toggleAudio(0, newsSources[0].name);
         }, 1000);
     </script>
 </body>
