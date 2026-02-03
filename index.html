@@ -404,9 +404,8 @@
         /* Fallback Links */
         .fallback-links {
             position: absolute;
-            bottom: 0.5rem;
+            top: 0.5rem;
             left: 0.5rem;
-            right: 0.5rem;
             display: flex;
             gap: 0.25rem;
             z-index: 9;
@@ -419,7 +418,6 @@
         }
 
         .fallback-link {
-            flex: 1;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -443,11 +441,23 @@
             font-size: 0.75rem;
         }
 
-        /* Fullscreen button */
-        .fullscreen-btn {
+        /* Panel Controls */
+        .panel-controls {
             position: absolute;
             top: 0.5rem;
             right: 0.5rem;
+            display: flex;
+            gap: 0.25rem;
+            z-index: 10;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .video-container:hover .panel-controls {
+            opacity: 1;
+        }
+
+        .panel-control-btn {
             background: rgba(0, 0, 0, 0.7);
             border: 1px solid rgba(255, 255, 255, 0.2);
             color: #fff;
@@ -455,21 +465,37 @@
             border-radius: 3px;
             cursor: pointer;
             font-size: 0.75rem;
-            z-index: 10;
             transition: all 0.2s ease;
             display: flex;
             align-items: center;
-            gap: 0.25rem;
-            opacity: 0;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
         }
 
-        .video-container:hover .fullscreen-btn {
-            opacity: 1;
-        }
-
-        .fullscreen-btn:hover {
+        .panel-control-btn:hover {
             background: rgba(0, 0, 0, 0.9);
             border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .panel-control-btn.danger:hover {
+            background: rgba(255, 68, 68, 0.9);
+            border-color: rgba(255, 68, 68, 0.6);
+        }
+
+        /* Hidden panel state */
+        .panel.hidden {
+            display: none;
+        }
+
+        /* Drag and drop */
+        .panel.dragging {
+            opacity: 0.5;
+        }
+
+        .panel.drag-over {
+            border-color: var(--border-active);
+            background: rgba(0, 217, 255, 0.1);
         }
 
         /* Legend */
@@ -531,6 +557,8 @@
                 <div class="status-item">
                     <span id="activeChannel">—</span>
                 </div>
+                <button class="settings-btn" onclick="showAllPanels()" style="margin-right: 0.5rem;">👁 SHOW ALL</button>
+                <button class="settings-btn" onclick="resetPanels()" style="margin-right: 0.5rem;">↻ RESET</button>
                 <button class="settings-btn" onclick="openSettings()">⚙ EDIT SOURCES</button>
             </div>
         </div>
@@ -712,6 +740,7 @@
             const panel = document.createElement('div');
             panel.className = 'panel';
             panel.dataset.index = index;
+            panel.draggable = true;
 
             // Convert YouTube URL to embed URL
             const embedUrl = source.videoUrl.replace('watch?v=', 'embed/');
@@ -736,9 +765,6 @@
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowfullscreen>
                     </iframe>
-                    <button class="fullscreen-btn" onclick="openFullscreen(${index})">
-                        ⛶ 
-                    </button>
                     <div class="fallback-links">
                         <a href="${source.youtubeUrl}" target="_blank" class="fallback-link">
                             <span class="link-icon">▶</span> YT
@@ -747,6 +773,17 @@
                             <span class="link-icon">🌐</span> Web
                         </a>
                     </div>
+                    <div class="panel-controls">
+                        <button class="panel-control-btn" onclick="openFullscreen(${index})" title="Fullscreen">
+                            ⛶
+                        </button>
+                        <button class="panel-control-btn" onclick="hidePanel(${index})" title="Hide panel">
+                            👁
+                        </button>
+                        <button class="panel-control-btn danger" onclick="removePanel(${index})" title="Remove panel">
+                            ✕
+                        </button>
+                    </div>
                 </div>
             `;
 
@@ -754,6 +791,13 @@
             panel.querySelector('.panel-header').addEventListener('click', () => {
                 toggleAudio(index, source.name);
             });
+
+            // Drag and drop handlers
+            panel.addEventListener('dragstart', handleDragStart);
+            panel.addEventListener('dragend', handleDragEnd);
+            panel.addEventListener('dragover', handleDragOver);
+            panel.addEventListener('drop', handleDrop);
+            panel.addEventListener('dragleave', handleDragLeave);
 
             return panel;
         }
@@ -788,6 +832,139 @@
                 iframe.webkitRequestFullscreen();
             } else if (iframe.msRequestFullscreen) {
                 iframe.msRequestFullscreen();
+            }
+        }
+
+        function hidePanel(index) {
+            const panel = document.querySelector(`[data-index="${index}"]`);
+            panel.classList.add('hidden');
+            
+            // Save hidden state
+            const hiddenPanels = JSON.parse(localStorage.getItem('hiddenPanels') || '[]');
+            if (!hiddenPanels.includes(index)) {
+                hiddenPanels.push(index);
+                localStorage.setItem('hiddenPanels', JSON.stringify(hiddenPanels));
+            }
+
+            // If this was the active panel, deactivate it
+            if (activePanel === index) {
+                activePanel = null;
+                document.getElementById('activeChannel').textContent = '—';
+            }
+        }
+
+        function removePanel(index) {
+            if (confirm(`Remove ${newsSources[index].name} from the dashboard?`)) {
+                const panel = document.querySelector(`[data-index="${index}"]`);
+                panel.remove();
+                
+                // Save removed state
+                const removedPanels = JSON.parse(localStorage.getItem('removedPanels') || '[]');
+                if (!removedPanels.includes(index)) {
+                    removedPanels.push(index);
+                    localStorage.setItem('removedPanels', JSON.stringify(removedPanels));
+                }
+
+                // If this was the active panel, deactivate it
+                if (activePanel === index) {
+                    activePanel = null;
+                    document.getElementById('activeChannel').textContent = '—';
+                }
+            }
+        }
+
+        // Drag and drop functionality
+        let draggedElement = null;
+
+        function handleDragStart(e) {
+            draggedElement = this;
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', this.innerHTML);
+        }
+
+        function handleDragEnd(e) {
+            this.classList.remove('dragging');
+            
+            // Remove drag-over class from all panels
+            document.querySelectorAll('.panel').forEach(panel => {
+                panel.classList.remove('drag-over');
+            });
+        }
+
+        function handleDragOver(e) {
+            if (e.preventDefault) {
+                e.preventDefault();
+            }
+            e.dataTransfer.dropEffect = 'move';
+            return false;
+        }
+
+        function handleDrop(e) {
+            if (e.stopPropagation) {
+                e.stopPropagation();
+            }
+
+            if (draggedElement !== this) {
+                // Swap the positions
+                const grid = document.getElementById('newsGrid');
+                const allPanels = [...grid.children];
+                const draggedIndex = allPanels.indexOf(draggedElement);
+                const droppedIndex = allPanels.indexOf(this);
+
+                if (draggedIndex < droppedIndex) {
+                    this.parentNode.insertBefore(draggedElement, this.nextSibling);
+                } else {
+                    this.parentNode.insertBefore(draggedElement, this);
+                }
+
+                // Save new order
+                savePanelOrder();
+            }
+
+            this.classList.remove('drag-over');
+            return false;
+        }
+
+        function handleDragLeave(e) {
+            this.classList.remove('drag-over');
+        }
+
+        function savePanelOrder() {
+            const grid = document.getElementById('newsGrid');
+            const order = [...grid.children].map(panel => parseInt(panel.dataset.index));
+            localStorage.setItem('panelOrder', JSON.stringify(order));
+        }
+
+        function restorePanelOrder() {
+            const savedOrder = localStorage.getItem('panelOrder');
+            if (!savedOrder) return;
+
+            const order = JSON.parse(savedOrder);
+            const grid = document.getElementById('newsGrid');
+            const panels = [...grid.children];
+
+            order.forEach(index => {
+                const panel = panels.find(p => parseInt(p.dataset.index) === index);
+                if (panel) {
+                    grid.appendChild(panel);
+                }
+            });
+        }
+
+        function showAllPanels() {
+            document.querySelectorAll('.panel.hidden').forEach(panel => {
+                panel.classList.remove('hidden');
+            });
+            localStorage.removeItem('hiddenPanels');
+        }
+
+        function resetPanels() {
+            if (confirm('Reset all panels? This will restore all removed panels and reset the order.')) {
+                localStorage.removeItem('hiddenPanels');
+                localStorage.removeItem('removedPanels');
+                localStorage.removeItem('panelOrder');
+                location.reload();
             }
         }
 
@@ -846,13 +1023,33 @@
 
         // Initialize grid
         const grid = document.getElementById('newsGrid');
+        const removedPanels = JSON.parse(localStorage.getItem('removedPanels') || '[]');
+        const hiddenPanels = JSON.parse(localStorage.getItem('hiddenPanels') || '[]');
+        
         newsSources.forEach((source, index) => {
-            grid.appendChild(createPanel(source, index));
+            // Skip removed panels
+            if (removedPanels.includes(index)) return;
+            
+            const panel = createPanel(source, index);
+            
+            // Apply hidden state
+            if (hiddenPanels.includes(index)) {
+                panel.classList.add('hidden');
+            }
+            
+            grid.appendChild(panel);
         });
 
-        // Auto-activate first panel
+        // Restore panel order
+        restorePanelOrder();
+
+        // Auto-activate first visible panel
         setTimeout(() => {
-            toggleAudio(0, newsSources[0].name);
+            const firstVisible = document.querySelector('.panel:not(.hidden)');
+            if (firstVisible) {
+                const index = parseInt(firstVisible.dataset.index);
+                toggleAudio(index, newsSources[index].name);
+            }
         }, 1000);
     </script>
 </body>
