@@ -543,6 +543,83 @@
             font-size: 0.75rem;
             font-family: 'JetBrains Mono', monospace;
         }
+
+        /* Volume slider */
+        .volume-control {
+            position: absolute;
+            bottom: 3rem;
+            right: 0.5rem;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            padding: 0.75rem 0.5rem;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .panel.active .volume-control {
+            opacity: 1;
+        }
+
+        .volume-slider {
+            writing-mode: bt-lr;
+            -webkit-appearance: slider-vertical;
+            width: 4px;
+            height: 80px;
+            background: var(--border-color);
+            outline: none;
+        }
+
+        .volume-icon {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        /* Keyboard shortcuts help */
+        .shortcuts-help {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 0.5rem 0.75rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            z-index: 1500;
+        }
+
+        .shortcuts-help.visible {
+            opacity: 1;
+        }
+
+        .shortcuts-help kbd {
+            background: var(--bg-panel);
+            padding: 0.15rem 0.35rem;
+            border-radius: 2px;
+            border: 1px solid var(--border-color);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+        }
+
+        /* Source count badge */
+        .source-count {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 3px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+        }
     </style>
 </head>
 <body>
@@ -552,11 +629,12 @@
             <div class="status">
                 <div class="status-item">
                     <span class="status-dot"></span>
-                    <span>25 SOURCES</span>
+                    <span class="source-count" id="sourceCount">25 SOURCES</span>
                 </div>
                 <div class="status-item">
                     <span id="activeChannel">—</span>
                 </div>
+                <button class="settings-btn" onclick="addNewSource()" style="margin-right: 0.5rem;">+ ADD SOURCE</button>
                 <button class="settings-btn" onclick="showAllPanels()" style="margin-right: 0.5rem;">👁 SHOW ALL</button>
                 <button class="settings-btn" onclick="resetPanels()" style="margin-right: 0.5rem;">↻ RESET</button>
                 <button class="settings-btn" onclick="openSettings()">⚙ EDIT SOURCES</button>
@@ -573,6 +651,58 @@
             </div>
             <div id="sourcesEditor" class="sources-grid"></div>
             <button class="save-settings-btn" onclick="saveSettings()">SAVE & RELOAD</button>
+        </div>
+    </div>
+
+    <!-- Add Source Modal -->
+    <div id="addSourceModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Add New Source</h2>
+                <button class="close-btn" onclick="closeAddSource()">&times;</button>
+            </div>
+            <div class="sources-grid">
+                <div class="source-editor">
+                    <div class="url-inputs">
+                        <div class="url-input-group">
+                            <label class="url-label">Channel Name *</label>
+                            <input type="text" id="newSourceName" class="url-input" placeholder="e.g., BBC News">
+                        </div>
+                        <div class="url-input-group">
+                            <label class="url-label">Country *</label>
+                            <input type="text" id="newSourceCountry" class="url-input" placeholder="e.g., United Kingdom">
+                        </div>
+                        <div class="url-input-group">
+                            <label class="url-label">Language *</label>
+                            <input type="text" id="newSourceLanguage" class="url-input" placeholder="e.g., English">
+                        </div>
+                        <div class="url-input-group">
+                            <label class="url-label">Region *</label>
+                            <select id="newSourceRegion" class="url-input">
+                                <option value="europe">Europe</option>
+                                <option value="mena">Middle East & North Africa</option>
+                                <option value="asia">Asia-Pacific</option>
+                                <option value="africa">Sub-Saharan Africa</option>
+                                <option value="latam">Latin America</option>
+                                <option value="namerica">North America</option>
+                            </select>
+                        </div>
+                        <div class="url-input-group">
+                            <label class="url-label">YouTube Video URL *</label>
+                            <input type="text" id="newSourceVideoUrl" class="url-input" placeholder="https://www.youtube.com/watch?v=...">
+                        </div>
+                        <div class="url-input-group">
+                            <label class="url-label">YouTube Channel Live Page</label>
+                            <input type="text" id="newSourceYoutubeUrl" class="url-input" placeholder="https://www.youtube.com/@channel/live">
+                        </div>
+                        <div class="url-input-group">
+                            <label class="url-label">Official Website Stream</label>
+                            <input type="text" id="newSourceWebsiteUrl" class="url-input" placeholder="https://example.com/live">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button class="save-settings-btn" onclick="saveNewSource()">ADD SOURCE</button>
         </div>
     </div>
 
@@ -611,8 +741,21 @@
     </main>
 
     <footer class="footer">
-        Global News Monitor — Real-time coverage from 25 sources across 6 continents
+        Global News Monitor — Real-time coverage from 25 sources across 6 continents<br>
+        <span style="opacity: 0.5; font-size: 0.65rem; margin-top: 0.5rem; display: inline-block;">Press <kbd style="background: var(--bg-panel); padding: 0.15rem 0.35rem; border-radius: 2px;">?</kbd> for keyboard shortcuts</span>
     </footer>
+
+    <!-- Keyboard shortcuts help -->
+    <div id="shortcutsHelp" class="shortcuts-help">
+        <div style="margin-bottom: 0.5rem; font-weight: 600; color: var(--text-primary);">Keyboard Shortcuts</div>
+        <div><kbd>Space</kbd> Toggle play/pause on active stream</div>
+        <div><kbd>M</kbd> Mute/unmute active stream</div>
+        <div><kbd>F</kbd> Fullscreen active stream</div>
+        <div><kbd>H</kbd> Hide active stream</div>
+        <div><kbd>1-9</kbd> Switch to stream 1-9</div>
+        <div><kbd>?</kbd> Toggle this help</div>
+        <div><kbd>Esc</kbd> Close this help</div>
+    </div>
 
     <script>
         // Default news sources - paste full YouTube video URLs here
@@ -1013,11 +1156,59 @@
             inputs.forEach(input => {
                 const index = parseInt(input.dataset.index);
                 const field = input.dataset.field;
-                newsSources[index][field] = input.value;
+                if (!isNaN(index) && field) {
+                    newsSources[index][field] = input.value;
+                }
             });
             
             localStorage.setItem('newsSources', JSON.stringify(newsSources));
             closeSettings();
+            location.reload();
+        }
+
+        function addNewSource() {
+            document.getElementById('addSourceModal').classList.add('active');
+        }
+
+        function closeAddSource() {
+            document.getElementById('addSourceModal').classList.remove('active');
+            // Clear form
+            document.getElementById('newSourceName').value = '';
+            document.getElementById('newSourceCountry').value = '';
+            document.getElementById('newSourceLanguage').value = '';
+            document.getElementById('newSourceRegion').value = 'europe';
+            document.getElementById('newSourceVideoUrl').value = '';
+            document.getElementById('newSourceYoutubeUrl').value = '';
+            document.getElementById('newSourceWebsiteUrl').value = '';
+        }
+
+        function saveNewSource() {
+            const name = document.getElementById('newSourceName').value.trim();
+            const country = document.getElementById('newSourceCountry').value.trim();
+            const language = document.getElementById('newSourceLanguage').value.trim();
+            const region = document.getElementById('newSourceRegion').value;
+            const videoUrl = document.getElementById('newSourceVideoUrl').value.trim();
+            const youtubeUrl = document.getElementById('newSourceYoutubeUrl').value.trim() || videoUrl;
+            const websiteUrl = document.getElementById('newSourceWebsiteUrl').value.trim() || videoUrl;
+
+            if (!name || !country || !language || !videoUrl) {
+                alert('Please fill in all required fields (*)');
+                return;
+            }
+
+            const newSource = {
+                name,
+                country,
+                language,
+                region,
+                videoUrl,
+                youtubeUrl,
+                websiteUrl
+            };
+
+            newsSources.push(newSource);
+            localStorage.setItem('newsSources', JSON.stringify(newsSources));
+            closeAddSource();
             location.reload();
         }
 
@@ -1040,6 +1231,13 @@
             grid.appendChild(panel);
         });
 
+        // Update source count
+        function updateSourceCount() {
+            const visibleCount = document.querySelectorAll('.panel:not(.hidden)').length;
+            document.getElementById('sourceCount').textContent = `${visibleCount} SOURCE${visibleCount !== 1 ? 'S' : ''}`;
+        }
+        updateSourceCount();
+
         // Restore panel order
         restorePanelOrder();
 
@@ -1051,6 +1249,74 @@
                 toggleAudio(index, newsSources[index].name);
             }
         }, 1000);
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Don't trigger if typing in an input
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+            const shortcutsHelp = document.getElementById('shortcutsHelp');
+
+            switch(e.key) {
+                case '?':
+                    shortcutsHelp.classList.toggle('visible');
+                    break;
+                case 'Escape':
+                    shortcutsHelp.classList.remove('visible');
+                    break;
+                case 'f':
+                case 'F':
+                    if (activePanel !== null) {
+                        openFullscreen(activePanel);
+                    }
+                    break;
+                case 'h':
+                case 'H':
+                    if (activePanel !== null) {
+                        hidePanel(activePanel);
+                        updateSourceCount();
+                    }
+                    break;
+                case 'm':
+                case 'M':
+                    if (activePanel !== null) {
+                        const iframe = document.getElementById(`player-${activePanel}`);
+                        // Toggle mute - this is simplified since we can't easily check mute state
+                        iframe.contentWindow.postMessage('{"event":"command","func":"mute","args":""}', '*');
+                    }
+                    break;
+                case ' ':
+                    e.preventDefault();
+                    if (activePanel !== null) {
+                        const iframe = document.getElementById(`player-${activePanel}`);
+                        iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+                    }
+                    break;
+                default:
+                    // Number keys 1-9 to switch streams
+                    if (e.key >= '1' && e.key <= '9') {
+                        const targetIndex = parseInt(e.key) - 1;
+                        const panels = document.querySelectorAll('.panel:not(.hidden)');
+                        if (panels[targetIndex]) {
+                            const index = parseInt(panels[targetIndex].dataset.index);
+                            toggleAudio(index, newsSources[index].name);
+                        }
+                    }
+            }
+        });
+
+        // Update source count when panels are hidden/shown
+        const originalHidePanel = hidePanel;
+        hidePanel = function(index) {
+            originalHidePanel(index);
+            updateSourceCount();
+        };
+
+        const originalShowAllPanels = showAllPanels;
+        showAllPanels = function() {
+            originalShowAllPanels();
+            updateSourceCount();
+        };
     </script>
 </body>
 </html>
